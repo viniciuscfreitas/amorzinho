@@ -1,0 +1,28 @@
+{
+    "name": "amorzinho",
+    "version": "1.0.0",
+    "description": "Wishlist de casais Grug Brain",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "generate-icons": "node generate-png-icons.js",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:e2e": "playwright test",
+        "test:e2e:ui": "playwright test --ui"
+    },
+    "dependencies": {
+        "cheerio": "^1.0.0",
+        "cors": "^2.8.5",
+        "express": "^5.1.0",
+        "express-rate-limit": "^7.1.5",
+        "node-fetch": "^2.7.0",
+        "qrcode": "^1.5.3",
+        "sqlite3": "^5.1.6"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.40.0",
+        "sharp": "^0.33.5",
+        "vitest": "^4.0.14"
+    }
+}

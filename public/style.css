@@ -1,0 +1,646 @@
+:root {
+    /* Palette provided by user */
+    --bg-color: #F5F4E1;
+    --card-bg: #FAF9F6;
+    --primary-bg: #E8B4B8;
+    --accent-bg: #D8E2D5;
+    --primary-dark: #9E3845;
+    --accent-dark: #1E2B1A;
+    --text-main: #2C1810;
+    --text-muted: #59504D;
+
+    /* Dimensions - Compact & Minimalist */
+    --border-radius: 16px;
+    --btn-radius: 12px;
+    /* Less bubbly, more modern */
+    --shadow-soft: 0 4px 24px -8px rgba(44, 24, 16, 0.06);
+    --shadow-hover: 0 8px 32px -8px rgba(158, 56, 69, 0.12);
+
+    /* Typography */
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+}
+
+/* Grug say: Hide scrollbar but keep scroll working! Simple solution! */
+/* Works on Firefox */
+* {
+    scrollbar-width: none;
+}
+
+/* Works on Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+    display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1F120D;
+        --card-bg: #2C1E1A;
+        --primary-bg: #4A2B2F;
+        --accent-bg: #2A3328;
+        --primary-dark: #FFB3BC;
+        --accent-dark: #8FBC8F;
+        --text-main: #F5F4E1;
+        --text-muted: #C0B0A8;
+    }
+
+    /* Grug fix: Dark mode button text must be dark for contrast against light pink/green */
+    .btn-primary,
+    .btn-secondary {
+        color: #1F120D !important;
+    }
+
+    /* Grug fix: Focus ring visibility in dark mode */
+    button:focus-visible,
+    a:focus-visible,
+    div[role="checkbox"]:focus-visible,
+    article[role="button"]:focus-visible,
+    .icon-btn:focus-visible {
+        border-color: #F5F4E1 !important;
+        box-shadow: 0 0 0 2px rgba(245, 244, 225, 0.3) !important;
+    }
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 8px 20px;
+    overflow-x: hidden;
+    line-height: 1.5;
+}
+
+main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .animate-enter {
+        animation: driftUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+}
+
+@keyframes driftUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.app-container {
+    width: 100%;
+    max-width: 440px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    border-radius: var(--border-radius);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Grug fix: focus visible indicator without the default ring */
+button:focus-visible,
+a:focus-visible,
+div[role="checkbox"]:focus-visible,
+article[role="button"]:focus-visible,
+.icon-btn:focus-visible {
+    outline: none;
+    transform: translateY(-1px);
+    opacity: 1;
+    /* background: rgba(255, 255, 255, 0.9); REMOVED */
+    border-color: var(--accent-dark);
+    box-shadow: inset 0 0 0 1px rgba(31, 68, 47, 0.3);
+}
+
+/* Specific focus styles for inputs (already handled below but reinforcing) */
+input:focus-visible {
+    outline: none;
+    border-bottom-color: var(--primary-dark);
+}
+
+h1,
+h2,
+.serif-display {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.03em;
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-soft);
+    padding: 20px;
+    border: 1px solid rgba(138, 126, 120, 0.06);
+    position: relative;
+    transition: box-shadow 0.3s ease;
+}
+
+.input-group {
+    margin-bottom: 16px;
+}
+
+input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--text-muted);
+    padding: 12px 0;
+    min-height: 44px;
+    /* WCAG 2.5.5 */
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    color: var(--text-main);
+    border-radius: 0;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-bottom-color: var(--primary-dark);
+}
+
+input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+    font-style: italic;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 0 20px;
+    border-radius: var(--btn-radius);
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.95rem;
+    min-height: 44px;
+    /* WCAG 2.5.5 */
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background: var(--primary-dark);
+    /* Using the Deep Red for primary action */
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(158, 56, 69, 0.3);
+}
+
+.btn-secondary {
+    background: var(--accent-dark);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(30, 43, 26, 0.3);
+}
+
+
+
+.btn-text {
+    background: transparent;
+    color: var(--text-muted);
+    text-decoration: none;
+    /* Grug fix: remove underline */
+}
+
+.btn-expand {
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    border-radius: 12px;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+}
+
+.btn-expand:hover {
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--text-main);
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+.icon-btn {
+    min-width: 44px;
+    /* WCAG 2.5.5 */
+    min-height: 44px;
+    border-radius: 12px;
+    /* Consistent with new radius */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--text-main);
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.icon-btn:hover {
+    background: rgba(31, 68, 47, 0.12);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 24px;
+    /* Grug fix: sticky header */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-color);
+    padding-top: 12px;
+    /* Add some top padding when sticky */
+    margin-top: -12px;
+    /* Compensate for padding to keep layout same */
+    border-bottom: none;
+    backdrop-filter: blur(8px);
+    opacity: 0.95;
+}
+
+/* Grug fix: WCAG 2.5.5 - spacing between interactive elements */
+header nav {
+    gap: 12px;
+    /* Minimum 8px spacing, but 12px is safer for touch */
+}
+
+.streak-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--primary-bg);
+    padding: 6px 14px;
+    border-radius: 20px;
+    color: var(--primary-dark);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.name-pill {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.wish-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 100px;
+}
+
+.wish-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.2s ease;
+    cursor: default;
+}
+
+.wish-item.bought-item {
+    opacity: 0.7;
+    background: rgba(0, 0, 0, 0.02);
+    box-shadow: none;
+}
+
+.wish-item.surprise-mode {
+    background: linear-gradient(135deg, var(--card-bg) 0%, var(--primary-bg) 150%);
+    border: 1px dashed var(--primary-dark);
+}
+
+.wish-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+
+
+.wish-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--bg-color);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: var(--primary-dark);
+    flex-shrink: 0;
+}
+
+.wish-content {
+    flex: 1;
+    min-width: 0;
+    /* Grug fix: permite que o conteúdo encolha e quebre corretamente */
+}
+
+.wish-title {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 2px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    text-decoration: none;
+}
+
+.wish-link {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    /* Grug fix: remove underline */
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    min-height: 44px;
+    margin: -4px -8px;
+    /* Grug fix: WCAG 2.5.5 - expand touch target to 44px height */
+}
+
+
+
+#toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text-main);
+    color: var(--bg-color);
+    padding: 16px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 999;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: max-content;
+    max-width: 90vw;
+    text-align: center;
+    pointer-events: none;
+}
+
+#toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+}
+
+.modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-sheet {
+    background: var(--card-bg);
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    border-radius: 32px 32px 0 0;
+    padding: 32px 24px 48px 24px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    max-height: 85vh;
+    overflow-y: auto;
+    outline: none;
+    /* Grug fix: outline removed for modal, but buttons inside have focus-visible */
+}
+
+.modal-overlay.open .modal-sheet {
+    transform: translateY(0);
+}
+
+.btn-remove {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 8px;
+    /* Grug fix: WCAG 2.5.5 - ensure 44×44px touch target */
+}
+
+/* Grug fix: skeleton loading for link fetch (simple, no lib) */
+.link-skeleton {
+    position: absolute;
+    top: 16px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--text-muted);
+    opacity: 0.2;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.link-skeleton .skeleton-line {
+    height: 100%;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(350%);
+    }
+}
+
+#add-item-card.fetching {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Grug fix: Toggle Switch for "Meta de Casal" */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked+.toggle-slider {
+    background-color: var(--primary-dark);
+}
+
+input:focus+.toggle-slider {
+    box-shadow: 0 0 1px var(--primary-dark);
+}
+
+input:checked+.toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.toggle-label {
+    font-size: 0.95rem;
+    color: var(--text-main);
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+}
+
+@media (min-width: 768px) {
+    .app-container {
+        max-width: 520px;
+        padding: 38px 32px;
+    }
+
+    #main-screen {
+        gap: 24px;
+    }
+
+    .card {
+        padding: 32px;
+    }
+
+    .wish-list {
+        gap: 20px;
+    }
+
+    header {
+        padding-bottom: 32px;
+    }
+}

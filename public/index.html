@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- WCAG 1.4.4: Zoom deve ser permitido (user-scalable=yes é o padrão, omitimos a restrição) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amorzinho - Lista de Desejos para Casais</title>
+
+    <!-- Design System Assets -->
+    <!-- Nota: Fontes externas podem impactar LCP, usamos preconnect para mitigar -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#F5F4E1">
+
+    <!-- Grug fix: confetti for dopamine hit when item bought -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <meta name="description" content="Wishlist de casais simples, acessível e romântico. Guarde seus sonhos a dois.">
+
+    <!-- Grug fix: Open Graph tags for WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Amorzinho - Lista de Desejos para Casais">
+    <meta property="og:description" content="Um lugar discreto para guardar seus sonhos e segredos a dois. ❤️">
+    <meta property="og:image" content="https://amorzinho.app/icon-512.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:url" content="https://amorzinho.app">
+    <meta property="og:site_name" content="Amorzinho">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Amorzinho - Lista de Desejos para Casais">
+    <meta name="twitter:description" content="Um lugar discreto para guardar seus sonhos e segredos a dois. ❤️">
+    <meta name="twitter:image" content="https://amorzinho.app/icon-512.png">
+</head>
+
+<body>
+
+    <!-- WCAG 4.1.3: Status messages (Toast) -->
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <!-- WIZARD MODAL (Grug fix: ask name on first login) -->
+    <div id="name-wizard" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="wizard-title"
+        aria-hidden="true">
+        <div class="modal-sheet" tabindex="-1">
+            <div class="modal-content" id="name-wizard-content">
+                <h2 style="text-align: center; margin-bottom: 8px;">Quem é você?</h2>
+                <p style="text-align: center; color: var(--text-muted); margin-bottom: 24px;">Para personalizarmos a
+                    experiência.</p>
+
+                <div class="input-group">
+                    <label for="wizard-name">Seu Nome</label>
+                    <input type="text" id="wizard-name" placeholder="Ex: Mozão">
+                </div>
+
+                <!-- Grug fix: collect birthdays and anniversary -->
+                <div class="input-group" style="margin-top: 16px;">
+                    <label for="wizard-birthday">Seu Aniversário</label>
+                    <input type="date" id="wizard-birthday">
+                </div>
+
+                <div class="input-group" style="margin-top: 16px;" id="wizard-anniversary-group">
+                    <label for="wizard-anniversary">Início do Namoro 💑</label>
+                    <input type="date" id="wizard-anniversary">
+                    <p id="wizard-anniversary-hint"
+                        style="font-size: 0.8rem; color: var(--accent-dark); margin-top: 4px; display: none; font-weight: 600;">
+                    </p>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">(Opcional, mas importante!)
+                    </p>
+                </div>
+
+                <button onclick="app.saveName()" class="btn btn-primary"
+                    style="width: 100%; margin-top: 24px;">Começar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA 1: LOGIN -->
+    <!-- Usamos 'inert' via JS para esconder esta tela quando o modal abrir -->
+    <main id="login-screen" class="app-container">
+        <div
+            style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <div style="color: var(--primary-dark); margin-bottom: 24px; animation: pulse 2s infinite;">
+                <i class="ph-fill ph-heart" style="font-size: 64px;"></i>
+            </div>
+
+            <h1>Nosso<br>Amorzinho</h1>
+            <p class="subtitle" style="margin-bottom: 48px; max-width: 280px;">
+                Um lugar discreto para guardar nossos sonhos e segredos.
+            </p>
+
+            <section class="card" style="width: 100%; padding: 32px 24px;">
+                <form onsubmit="event.preventDefault(); app.login();">
+                    <div class="input-group">
+                        <label for="code-input" class="sr-only">Código do Casal</label>
+                        <input type="text" id="code-input" placeholder="CÓDIGO SECRETO" maxlength="8" autocomplete="off"
+                            style="text-align: center; letter-spacing: 4px; text-transform: uppercase; font-weight: 700; color: var(--primary-dark); font-size: 1.5rem;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        Entrar no Nosso Mundo
+                    </button>
+                </form>
+            </section>
+
+            <button onclick="app.createCouple()" class="btn btn-text" style="margin-top: 24px;">
+                Criar nova história
+            </button>
+        </div>
+    </main>
+
+    <!-- TELA 2: MAIN DASHBOARD -->
+    <main id="main-screen" class="app-container hidden" aria-hidden="true">
+        <header class="animate-enter">
+            <div>
+                <!-- h2 marca o início do conteúdo principal -->
+                <h2 style="margin:0; font-size: 1.5rem;">Amorzinho</h2>
+                <!-- aria-label fornece leitura completa para SR, ignorando o ícone -->
+                <div class="streak-pill" id="streak-display" aria-label="1 dia amando">
+                    <i class="ph-fill ph-heart" aria-hidden="true"></i> 1 dia amando
+                </div>
+                <div class="name-pill" aria-live="polite">
+                    <span id="creator-label"></span>
+                    <span id="guest-label"></span>
+                </div>
+            </div>
+            <nav style="display: flex; gap: 12px;" aria-label="Menu Principal">
+                <!-- Grug fix: WCAG 2.5.5 - 12px gap between interactive elements -->
+                <button id="qr-toggle-btn" onclick="app.toggleQR()" class="icon-btn"
+                    aria-label="Mostrar Código QR para compartilhar" aria-expanded="false"><i class="ph ph-qr-code"
+                        aria-hidden="true"></i></button>
+                <button id="settings-toggle-btn" onclick="app.toggleSettings()" class="icon-btn"
+                    aria-label="Abrir Configurações e Datas" aria-haspopup="dialog" aria-expanded="false"><i
+                        class="ph ph-gear" aria-hidden="true"></i></button>
+            </nav>
+        </header>
+
+        <!-- Grug fix: PWA Install Button -->
+        <button id="pwa-install-btn" type="button"
+            style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; background: var(--accent-dark); color: white; padding: 12px 24px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; align-items: center; gap: 8px; min-height: 44px;"
+            onclick="app.installPWA()">
+            <!-- Grug fix: WCAG 2.5.5 - ensure 44px minimum touch target -->
+            <i class="ph ph-download" aria-hidden="true"></i>
+            <span>Adicionar à tela inicial</span>
+        </button>
+
+
+        <!-- Add New Item Section -->
+        <!-- Add New Item Section (Compact) -->
+        <section class="card animate-enter" id="add-item-card"
+            style="margin-bottom: 24px; padding: 16px; gap: 12px; display: flex; flex-direction: column;"
+            aria-labelledby="new-wish-heading">
+            <h3 id="new-wish-heading" class="sr-only">Adicionar novo desejo</h3>
+
+            <!-- Main Input Row -->
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <div style="position: relative; flex: 1;">
+                    <label for="item-title" class="sr-only">O que você deseja?</label>
+                    <input type="text" id="item-title" placeholder="Desejo ou link..."
+                        style="margin-bottom: 0; padding-right: 8px;">
+                    <!-- Skeleton for link fetch -->
+                    <div id="link-skeleton" class="link-skeleton hidden" style="top: auto; bottom: 0;">
+                        <div class="skeleton-line"></div>
+                    </div>
+                </div>
+                <button onclick="app.addItem()" class="icon-btn"
+                    style="background: var(--primary-dark); color: white; flex-shrink: 0;" aria-label="Adicionar">
+                    <i class="ph-bold ph-plus"></i>
+                </button>
+            </div>
+
+            <!-- Expand Trigger -->
+            <div>
+                <button onclick="app.toggleAddOptions()" class="btn btn-expand" aria-expanded="false"
+                    aria-controls="add-options">
+                    <i class="ph ph-sliders-horizontal"></i> <span>Mais opções</span>
+                </button>
+            </div>
+
+            <!-- Hidden Options -->
+            <div id="add-options" class="hidden"
+                style="display: flex; flex-direction: column; gap: 12px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.05);">
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label for="item-note" class="sr-only">Observação</label>
+                    <input type="text" id="item-note" placeholder="Observação (tamanho, cor...)" maxlength="200"
+                        style="font-size: 0.9rem;">
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <label for="item-is-goal"
+                        style="font-size: 0.9rem; font-weight: 600; color: var(--text-main); cursor: pointer;">É uma
+                        meta? 🚀</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="item-is-goal" onchange="app.toggleGoalDate()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div id="goal-date-container" class="hidden" style="animation: slideDown 0.3s ease;">
+                    <label for="item-goal-date" class="sr-only">Data alvo</label>
+                    <input type="date" id="item-goal-date" style="width: 100%;">
+                </div>
+            </div>
+        </section>
+
+        <!-- HERO WIDGET (Grug fix: show next big date) -->
+        <div id="hero-widget" style="margin-bottom: 24px;"></div>
+
+        <!-- Wishlist -->
+        <!-- aria-live="polite" para anunciar novos itens adicionados/removidos -->
+        <section id="wish-list" class="wish-list animate-enter" aria-label="Lista de desejos" aria-live="polite">
+            <!-- Items rendered via JS -->
+        </section>
+    </main>
+
+    <!-- QR CODE MODAL -->
+    <div id="qr-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="qr-title"
+        aria-hidden="true">
+        <div class="modal-sheet" tabindex="-1">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                <h2 id="qr-title" style="margin: 0; font-size: 1.5rem;">Compartilhar Código</h2>
+                <button id="close-qr-btn" onclick="app.toggleQR()" class="icon-btn" aria-label="Fechar QR Code"><i
+                        class="ph ph-x" aria-hidden="true"></i></button>
+            </div>
+
+            <div style="text-align: center;">
+                <h3 class="subtitle" style="font-size: 1rem; margin-bottom: 16px;">Para o seu amor entrar:</h3>
+                <div style="background: white; padding: 12px; border-radius: 16px; display: inline-block;">
+                    <img id="qr-img" src="" alt="QR Code do código do casal"
+                        style="width: 140px; height: 140px; display: block;">
+                </div>
+                <button onclick="app.copyCode()" class="btn"
+                    style="margin-top: 16px; color: var(--accent-dark); font-family: monospace; letter-spacing: 2px;">
+                    <span id="display-code">CODE</span> <i class="ph ph-copy" aria-hidden="true"
+                        style="margin-left:8px;"></i>
+                    <span class="sr-only">Copiar código para área de transferência</span>
+                </button>
+                <button onclick="app.copyDeepLink()" class="btn btn-text" style="margin-top: 12px; font-size: 0.9rem;">
+                    <i class="ph ph-link" aria-hidden="true"></i> Copiar link direto
+                    <span class="sr-only">(abre direto no app)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS / DATES MODAL -->
+    <!-- role="dialog" e aria-modal="true" indicam que o resto da página está inerte -->
+    <div id="settings-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title"
+        aria-hidden="true">
+        <!-- tabindex="-1" permite focar programaticamente no container ao abrir -->
+        <div class="modal-sheet" tabindex="-1">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                <h2 id="settings-title" style="margin: 0; font-size: 1.5rem;">Nossos Momentos</h2>
+                <button id="close-settings-btn" onclick="app.toggleSettings()" class="icon-btn"
+                    aria-label="Fechar configurações"><i class="ph ph-x" aria-hidden="true"></i></button>
+            </div>
+
+            <div style="margin-bottom: 32px;">
+                <h3 class="serif-display" style="margin-bottom: 16px; color: var(--accent-dark); font-size: 1.1rem;">
+                    Próximas Datas</h3>
+                <div id="dates-container" style="display: grid; gap: 12px;">
+                    <!-- Dates rendered here -->
+                </div>
+
+                <!-- Add Date Form -->
+                <div style="display: flex; gap: 12px; margin-top: 16px; align-items: center;">
+                    <label for="date-name" class="sr-only">Nome da data especial</label>
+                    <input type="text" id="date-name" placeholder="Nova data..."
+                        style="font-size: 1rem; height: 48px; padding: 0 8px; box-sizing: border-box; line-height: 48px; vertical-align: middle;">
+
+                    <label for="date-val" class="sr-only">Escolher data</label>
+                    <input type="date" id="date-val"
+                        style="min-width: 48px; height: 48px; padding: 0 8px; box-sizing: border-box; line-height: 48px; vertical-align: middle;">
+
+                    <button onclick="app.addDate()" class="icon-btn"
+                        style="background: var(--accent-dark); color: white;" aria-label="Adicionar data especial"><i
+                            class="ph-bold ph-plus" aria-hidden="true"></i></button>
+                </div>
+            </div>
+
+            <div class="card" style="background: var(--bg-color); border: 1px solid var(--primary-dark);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <i class="ph-fill ph-sparkle" style="color: var(--primary-dark);" aria-hidden="true"></i>
+                    <span class="serif-display" style="font-size: 1rem;">Amor Ilimitado</span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+                    Desbloqueie cartas de amor diárias e histórico infinito.
+                </p>
+                <div style="display: flex; gap: 8px; flex-direction: column;">
+                    <button onclick="app.checkout('monthly')" class="btn"
+                        style="border: 2px solid var(--text-main); padding: 12px; font-size: 0.9rem;">
+                        R$9/mês
+                    </button>
+                    <button onclick="app.checkout('yearly')" class="btn"
+                        style="border: 2px solid var(--accent-dark); background: var(--accent-dark); color: white; padding: 12px; font-size: 0.9rem;">
+                        R$69/ano (Economize 36%)
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="app.logout()" class="btn" style="color: #D32F2F; margin-top: 24px; text-decoration: none;">
+                Sair do aplicativo
+            </button>
+        </div>
+    </div>
+
+    <!-- CONFIRM MODAL (Grug fix: replace ugly native confirm) -->
+    <div id="confirm-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-title"
+        aria-hidden="true">
+        <div class="modal-sheet" tabindex="-1">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 id="confirm-title" style="margin: 0; font-size: 1.5rem;">Confirmar</h2>
+                <button id="close-confirm-btn" onclick="app.closeConfirm()" class="icon-btn" aria-label="Fechar"><i
+                        class="ph ph-x" aria-hidden="true"></i></button>
+            </div>
+
+            <div style="margin-bottom: 32px;">
+                <p id="confirm-message" style="font-size: 1rem; color: var(--text-main); line-height: 1.6;"></p>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <button onclick="app.confirmCancel()" class="btn"
+                    style="flex: 1; border: 2px solid var(--text-muted); background: transparent; color: var(--text-muted);">
+                    Cancelar
+                </button>
+                <button onclick="app.confirmOk()" class="btn btn-primary" style="flex: 1;">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Identity Recovery Modal -->
+    <div id="identity-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="identity-title">
+        <div class="modal-sheet" tabindex="-1">
+            <div class="modal-content">
+                <h2 id="identity-title" class="subtitle" style="margin-bottom: 16px;">Bem-vindo de volta! ❤️</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">
+                    Quem está por aí?
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button id="btn-identity-1" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        Sou [Nome 1]
+                    </button>
+                    <button id="btn-identity-2" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        Sou [Nome 2]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grug say: Split app into modules! Easy to find, easy to maintain. -->
+    <!-- Order important: config first, then utils/helpers, then core for state, then features! -->
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="item-helpers.js"></script>
+    <script src="app-core.js"></script>
+    <script src="app-auth.js"></script>
+    <script src="app-items.js"></script>
+    <script src="app-dates.js"></script>
+    <script src="app-modals.js"></script>
+</body>
+
+</html>

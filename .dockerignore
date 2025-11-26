@@ -1,0 +1,7 @@
+node_modules
+amorzinho.db
+scrape-debug
+tests
+*.log
+.git
+

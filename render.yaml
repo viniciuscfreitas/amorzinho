@@ -1,0 +1,18 @@
+# Grug fix: Render.com deploy config
+services:
+  - type: web
+    name: amorzinho
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: ABACATEPAY_API_KEY
+        sync: false
+    healthCheckPath: /
+    autoDeploy: true
+
