@@ -242,10 +242,11 @@ app.getDatesFromWizard = function () {
 // Grug fix: Create new couple (only this, nothing else!)
 app.createNewCouple = async function (name) {
     // Grug fix: Use safeFetch!
+    const payload = { name };
     const { data, error } = await safeFetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: '', name: name })
+        body: JSON.stringify(payload)
     });
 
     if (error || !data.code) {

@@ -33,4 +33,7 @@ module.exports = {
         monthly: 900,  // R$ 9.00 in cents
         yearly: 6900   // R$ 69.00 in cents
     }
+,
+    // Security
+    WEBHOOK_SECRET: process.env.ABACATEPAY_WEBHOOK_SECRET || null
 };

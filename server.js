@@ -416,13 +416,14 @@ app.post('/api/items/:id/delete', async (req, res) => {
             return res.status(404).json({ error: 'Item não encontrado' });
         }
 
-        // Grug fix: validate code matches
-        if (code && item.couple_code !== code) {
+        // Grug fix: validate code matches (required now)
+        if (!code || !isValidCode(code) || item.couple_code !== code) {
             return res.status(403).json({ error: 'Não autorizado' });
         }
 
         // Grug fix: validate user can delete (only who added it)
-        if (userName && item.added_by && item.added_by !== userName) {
+        const requestedUser = userName || 'Você';
+        if (item.added_by && item.added_by !== requestedUser) {
             return res.status(403).json({ error: 'Apenas quem adicionou pode deletar' });
         }
 
@@ -514,6 +515,13 @@ app.post('/api/checkout', async (req, res) => {
 app.post('/api/webhook', async (req, res) => {
     try {
         // Grug say: AbacatePay sends { data: {...}, error: null }
+        if (CONFIG.WEBHOOK_SECRET) {
+            const incomingSecret = req.header('x-abacatepay-secret') || req.header('x-abacatepay-webhook-secret');
+            if (!incomingSecret || incomingSecret !== CONFIG.WEBHOOK_SECRET) {
+                console.warn('AbacatePay webhook rejected: invalid secret');
+                return res.status(403).send('Forbidden');
+            }
+        }
         const { data } = req.body;
 
         // Grug fix: check if payment is completed
